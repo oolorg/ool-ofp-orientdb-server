@@ -16,10 +16,12 @@
     	<jaxrs:serviceBeans>
         	<ref bean="TopologyService" />
         	<ref bean="OFPatchService" />
+        	<ref bean="DeviceManagerService" />
     	</jaxrs:serviceBeans>
 	</jaxrs:server>
 	
 	<bean id="TopologyService" class="ool.com.orientdb.service.TopologyServiceImpl" />
-	<bean id="OFPatchService" class="ool.com.orientdb.service.OFPatchServiceImpl" /> 
+	<bean id="OFPatchService" class="ool.com.orientdb.service.OFPatchServiceImpl" />
+	<bean id="DeviceManagerService" class="ool.com.orientdb.service.DeviceManagerServiceImpl" />
 
 </beans>

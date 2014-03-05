@@ -5,6 +5,7 @@
  */
 package ool.com.orientdb.business;
 
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,16 +15,26 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
 import ool.com.orientdb.client.ConnectionUtils;
 import ool.com.orientdb.client.ConnectionUtilsImpl;
 import ool.com.orientdb.client.Dao;
 import ool.com.orientdb.client.DaoImpl;
+import ool.com.orientdb.json.DeviceManagerCreateDeviceInfoJsonIn;
+import ool.com.orientdb.json.DeviceManagerCreateDeviceInfoJsonOut;
 import ool.com.orientdb.json.LinkDevice;
 import ool.com.orientdb.json.Node;
 import ool.com.orientdb.json.LogicalTopologyJsonGetOut;
+import ool.com.orientdb.json.Port;
+import ool.com.orientdb.json.TopologyCreateWiringJsonIn;
+import ool.com.orientdb.json.TopologyCreateWiringJsonOut;
+import ool.com.orientdb.json.TopologyDeleteWiringJsonIn;
+import ool.com.orientdb.json.TopologyDeleteWiringJsonOut;
 import ool.com.orientdb.utils.Definition;
+import ool.com.orientdb.utils.ErrorMessage;
 
 
 /**
@@ -33,6 +44,8 @@ import ool.com.orientdb.utils.Definition;
 public class TopologyBusinessImpl implements TopologyBusiness {
 	
 	private static final Logger logger = Logger.getLogger(TopologyBusinessImpl.class);
+	
+	Gson gson = new Gson();
 
 	/* (non-Javadoc)
 	 * @see ool.com.ofpm.business.TopologyBusiness#createHello(ool.com.ofpm.json.TopologyJsonGetIn)
@@ -54,18 +67,12 @@ public class TopologyBusinessImpl implements TopologyBusiness {
     		List<String> deviceNameList = Arrays.asList(deviceNames.split(Definition.QUERY_SPLIT_WORD_COMMA));
 			ODocument document = null;
 			List<List<String>> connectNodeList = new ArrayList<List<String>>();
-			String rid = "#0";
 			
 			// json
 			List<Node> nodeList = new ArrayList<Node>();
 			List<LinkDevice> linkList = new ArrayList<LinkDevice>();
 			Node node = null;
-			LinkDevice link = null;
-			// connected patch port rid list
-			//List<String> patchPortList = new ArrayList<String>();
-			// key:patch port　rid value:connected deviceName
-			//Map<String,String> mapPatchPortDevice = new HashMap<String,String>();
-			
+			LinkDevice link = null;		
 			
 			for (String deviceName : deviceNameList) {
 				
@@ -74,15 +81,6 @@ public class TopologyBusinessImpl implements TopologyBusiness {
 				node.setDeviceName(document.field("name").toString());
 				node.setDeviceType(document.field("type").toString());
 				nodeList.add(node);
-				/*
-				rid = document.getIdentity().toString();
-
-				// get connected patch port list to connected device 
-				List<String> patchPortRidList = dao.getPatchPortRidList(rid);
-				for (String portRid : patchPortRidList) {
-					patchPortList.add(portRid);
-					mapPatchPortDevice.put(portRid, deviceName);
-				}*/
 			}
 			List<List<String>> connectedDeviceNameList = dao.getPatchConnectedDevice();
 			for(List<String> connectNode : connectedDeviceNameList) {
@@ -91,22 +89,6 @@ public class TopologyBusinessImpl implements TopologyBusiness {
 				}
 				connectNodeList.add(connectNode);
 			}
-/*
-			List<List<String>> patchPortPairList = getPatchPortPairList(patchPortList);
-				
-			// check patch wiring
-			for (List<String> patchPortPair : patchPortPairList) {
-				if (dao.isContainsPatchWiring(patchPortPair)) {
-					connectNode = new ArrayList<String>();
-					connectNode.add(mapPatchPortDevice.get(patchPortPair.get(0)));
-					connectNode.add(mapPatchPortDevice.get(patchPortPair.get(1)));
-					if (isOverlap(connectNodeList, connectNode)) {
-						continue;
-					}
-					connectNodeList.add(connectNode);
-				}
-			}
-			*/
 			
 			// create response data
 			resultData.setNode(nodeList);
@@ -138,6 +120,162 @@ public class TopologyBusinessImpl implements TopologyBusiness {
 		}
 		if (logger.isDebugEnabled()) {
     		logger.debug(String.format("getTopology(ret=%s) - end ", ret));
+    	}
+		return ret;
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.business.TopologyBusiness#createWiring(java.lang.String)
+	 */
+	@Override
+	public String createWiring(String params) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("createWiring(params=%s) - start ", params));
+    	}
+    	
+		String ret = "";
+		Dao dao = null;
+		TopologyCreateWiringJsonOut outPara = new TopologyCreateWiringJsonOut();
+				
+		try {
+	        Type type = new TypeToken<TopologyCreateWiringJsonIn>(){}.getType();
+	        TopologyCreateWiringJsonIn inPara = gson.fromJson(params, type);
+	        
+			ConnectionUtils utils = new ConnectionUtilsImpl();
+			dao = new DaoImpl(utils);
+			
+			List<Port> portList = inPara.getLink();
+			String rid1 = "";
+			String rid2 = "";
+			
+			// portList 2つ以上アウト
+			
+			// get port rid
+			ODocument doc = dao.getPortInfo(portList.get(0).getPortName(), portList.get(0).getDeviceName());
+			rid1 = doc.getIdentity().toString();
+			doc = dao.getPortInfo(portList.get(1).getPortName(), portList.get(1).getDeviceName());
+			rid2 = doc.getIdentity().toString();
+			
+			if (rid1.isEmpty()) {
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portList.get(0).getPortName() + "," + portList.get(0).getDeviceName()));
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				return ret;
+			} else if (rid2.isEmpty()) {
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portList.get(1).getPortName() + "," + portList.get(1).getDeviceName()));
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				return ret;
+			}
+			
+			if (dao.createLinkInfo(rid1, rid2) == Definition.DB_RESPONSE_STATUS_EXIST) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_BAD_REQUEST);
+				outPara.setMessage(String.format(ErrorMessage.ALREADY_EXIST, portList.get(0).getPortName() + "," + portList.get(1).getPortName()));
+			} else {
+				if (dao.createLinkInfo(rid2, rid1) == Definition.DB_RESPONSE_STATUS_EXIST) {
+					outPara.setStatusCode(Definition.HTTP_STATUS_CODE_BAD_REQUEST);
+					outPara.setMessage(String.format(ErrorMessage.ALREADY_EXIST, portList.get(0).getPortName() + "," + portList.get(1).getPortName()));
+				} else {
+					outPara.setStatusCode(Definition.HTTP_STATUS_CODE_CREATED);
+				}
+			}
+    	} catch (SQLException e) {
+    		logger.error(e.getMessage());
+    		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+    		outPara.setMessage(e.getMessage());
+		}  catch (RuntimeException re) {
+			logger.error(re.getMessage());
+			outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			outPara.setMessage(re.getMessage());
+		} finally {
+			try {
+				dao.close();
+			} catch (SQLException e) {
+				logger.error(e.getMessage());
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+				outPara.setMessage(e.getMessage());
+			}
+			Type type = new TypeToken<DeviceManagerCreateDeviceInfoJsonOut>(){}.getType();
+	        ret = gson.toJson(outPara, type);
+		}
+		if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("createWiring(ret=%s) - end ", ret));
+    	}
+		return ret;
+	}
+	
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.business.TopologyBusiness#deleteWiring(java.lang.String)
+	 */
+	@Override
+	public String deleteWiring(String params) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deleteWiring(params=%s) - start ", params));
+    	}
+    	
+		String ret = "";
+		Dao dao = null;
+		TopologyDeleteWiringJsonOut outPara = new TopologyDeleteWiringJsonOut();
+				
+		try {
+	        Type type = new TypeToken<TopologyDeleteWiringJsonIn>(){}.getType();
+	        TopologyDeleteWiringJsonIn inPara = gson.fromJson(params, type);
+	        
+			ConnectionUtils utils = new ConnectionUtilsImpl();
+			dao = new DaoImpl(utils);
+			
+			List<Port> portList = inPara.getLink();
+			String rid1 = "";
+			String rid2 = "";
+			
+			// portList 2つ以上アウト
+			
+			// get port rid
+			ODocument doc = dao.getPortInfo(portList.get(0).getPortName(), portList.get(0).getDeviceName());
+			rid1 = doc.getIdentity().toString();
+			doc = dao.getPortInfo(portList.get(1).getPortName(), portList.get(1).getDeviceName());
+			rid2 = doc.getIdentity().toString();
+			
+			if (rid1.isEmpty()) {
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portList.get(0).getPortName() + "," + portList.get(0).getDeviceName()));
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				return ret;
+			} else if (rid2.isEmpty()) {
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portList.get(1).getPortName() + "," + portList.get(1).getDeviceName()));
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				return ret;
+			}
+			
+			if (dao.deleteLinkInfo(rid1, rid2) == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portList.get(0).getPortName() + "," + portList.get(1).getPortName()));
+			} else {
+				if (dao.deleteLinkInfo(rid2, rid1) == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
+					outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+					outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portList.get(0).getPortName() + "," + portList.get(1).getPortName()));
+				} else {
+					outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
+				}
+			}
+    	} catch (SQLException e) {
+    		logger.error(e.getMessage());
+    		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+    		outPara.setMessage(e.getMessage());
+		}  catch (RuntimeException re) {
+			logger.error(re.getMessage());
+			outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			outPara.setMessage(re.getMessage());
+		} finally {
+			try {
+				dao.close();
+			} catch (SQLException e) {
+				logger.error(e.getMessage());
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+				outPara.setMessage(e.getMessage());
+			}
+			Type type = new TypeToken<DeviceManagerCreateDeviceInfoJsonOut>(){}.getType();
+	        ret = gson.toJson(outPara, type);
+		}
+		if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deleteWiring(ret=%s) - end ", ret));
     	}
 		return ret;
 	}
@@ -189,5 +327,6 @@ public class TopologyBusinessImpl implements TopologyBusiness {
     	}
 		return patchPortPairList;
 	}
-	
+
+
 }

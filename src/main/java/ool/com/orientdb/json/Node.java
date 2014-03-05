@@ -13,6 +13,7 @@ public class Node {
 	
 	private String deviceName;
 	private String deviceType;
+	private boolean ofpFlag;
 	/**
 	 * @return the deviceName
 	 */
@@ -37,6 +38,19 @@ public class Node {
 	public void setDeviceType(final String deviceType) {
 		this.deviceType = deviceType;
 	}
+	/**
+	 * @return the ofpFlag
+	 */
+	public boolean getOfpFlag() {
+		return ofpFlag;
+	}
+	/**
+	 * @param ofpFlag the ofpFlag to set
+	 */
+	public void setOfpFlag(final boolean ofpFlag) {
+		this.ofpFlag = ofpFlag;
+	}
+
 	
 	
 

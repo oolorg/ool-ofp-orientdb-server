@@ -81,7 +81,11 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getDeviceRid(ret=%s) - end", documents.get(0).getIdentity().toString()));
 			}
-			return documents.get(0).getIdentity().toString();			
+			if (documents.size() > 0) {
+				return documents.get(0).getIdentity().toString();
+			} else {
+				return null;
+			}
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -330,6 +334,29 @@ public class DaoImpl implements Dao {
 			throw new SQLException(e.getMessage());
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getPortInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ODocument getPortInfo(String name, String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("getPortInfo(name=%s, deviceName=%s) - start", name, deviceName));
+		}
+		try {
+			String query = String.format(Definition.SQL_GET_PORT_INFO, name, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
+			}
+			return documents.get(0);			
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.client.Dao#updateLinkWeight(int, java.lang.String, java.lang.String)
@@ -384,6 +411,146 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getPatchConnectedDevice(ret=%s) - end", deviceNameList));
 			}
 			return deviceNameList;			
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#createNodeInfo(java.lang.String, java.lang.String, boolean)
+	 */
+	@Override
+	public int createNodeInfo(String name, String type, boolean ofpFlag) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("createNodeInfo(name=%s, type=%s, ofpFlag=%s) - start", name, type, ofpFlag));
+		}
+		try {
+			try {
+				ODocument document = getDeviceInfo(name);
+				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
+			}
+			catch(SQLException se){
+			}
+			String query = String.format(Definition.SQL_INSERT_NODE, name, type, ofpFlag);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+			if (logger.isDebugEnabled()){
+				logger.debug("createNodeInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#createPortInfo(java.lang.String, int, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public int createPortInfo(String portName, int portNumber, String type, String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("createPortInfo(portName=%s, portNumber=%s, type=%s, deviceName=%s) - start", 
+					portName, portNumber, deviceName, type));
+		}
+		try {
+			try {
+				ODocument document = getPortInfo(portName, deviceName);
+				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
+			}
+			catch(SQLException se){
+			}
+			String query = String.format(Definition.SQL_INSERT_PORT, portName, portNumber, type, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+			if (logger.isDebugEnabled()){
+				logger.debug("createPortInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getLinkInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ODocument getLinkInfo(String outRid, String inRid) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("getLinkInfo(inRid=%s, outRid=%s) - start", inRid, outRid));
+		}
+		try {
+			String query = String.format(Definition.SQL_GET_LINK, outRid, inRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("getLinkInfo(ret=%s) - end", documents.get(0)));
+			}
+			return documents.get(0);			
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#createLinkInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public int createLinkInfo(String outRid, String inRid) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("createLinkInfo(inRid=%s, outRid=%s) - start", inRid, outRid));
+		}
+		try {
+			try {
+				ODocument document = getLinkInfo(outRid, inRid);
+				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
+			}
+			catch(SQLException se){
+			}
+			String query = String.format(Definition.SQL_INSERT_LINK, outRid, inRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+			if (logger.isDebugEnabled()){
+				logger.debug("createLinkInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#deleteLinkInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public int deleteLinkInfo(String outRid, String inRid) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("deleteLinkInfo(inRid=%s, outRid=%s) - start", inRid, outRid));
+		}
+		try {
+			try {
+				ODocument document = getLinkInfo(outRid, inRid);
+			}
+			catch(SQLException se){
+				return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //duplicate error
+			}
+			String query = String.format(Definition.SQL_DELETE_LINK, outRid, inRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+			if (logger.isDebugEnabled()){
+				logger.debug("deleteLinkInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}

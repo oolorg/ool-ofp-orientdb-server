@@ -28,6 +28,13 @@ public class Definition {
 	public static final int DIJKSTRA_WEIGHT_NO_ROUTE = 100;
 	public static final int DIJKSTRA_WEIGHT_AVAILABLE_ROUTE = 1;
 	
+	public static final String NODE_TYPE_SERVER = "Server";
+	public static final String NODE_TYPE_SWITCH = "Switch";
+	
+	public static final int DB_RESPONSE_STATUS_OK = 200;
+	public static final int DB_RESPONSE_STATUS_EXIST = 210;
+	public static final int DB_RESPONSE_STATUS_NOT_FOUND = 404;
+	
 	public static final String SQL_GET_DEVICE = "select from node where name='%s'";
 	public static final String SQL_GET_CONNECTED_NODE = "select from (traverse * from %s) where @class='node' and $depth=6";
 	public static final String SQL_GET_PATCHPORT_RID = "select from (traverse * from %s) where @class='port' and $depth=4";
@@ -40,5 +47,13 @@ public class Definition {
 	public static final String SQL_GET_PATCH_CONNECTED_NODE = "select from patchWiring";
 	public static final String SQL_DELETE_PATCH_WIRING = "delete from patchWiring where outDeviceName = '%s' and inDeviceName = '%s'";
 	public static final String SQL_GET_PORT = "select from port where @RID = %s";
+	public static final String SQL_GET_PORT_INFO = "select from port where name = '%s' and deviceName = '%s'";
+	public static final String SQL_GET_LINK = "select from link where out = %s and in = %s";
+	
+	public static final String SQL_INSERT_NODE = "insert into node (name, type, ofpFlag) values ('%s', '%s', %s)";
+	public static final String SQL_INSERT_PORT = "insert into port (name, number, type, deviceName) values ('%s', %s, '%s', '%s')";
+	public static final String SQL_INSERT_LINK = "insert into link (out, in ,weight) values (%s, %s, 1)";
+	
+	public static final String SQL_DELETE_LINK = "delete from link where out = %s and in = %s";
 
 }

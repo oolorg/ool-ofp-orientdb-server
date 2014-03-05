@@ -15,5 +15,7 @@ public interface TopologyBusiness {
 
 	public LogicalTopologyJsonGetOut getTopology(String deviceNames);
 	
-	//public TopologyJsonGetOut createHello(TopologyJsonGetIn params);
+	public String createWiring(String params);
+	
+	public String deleteWiring(String params);
 }

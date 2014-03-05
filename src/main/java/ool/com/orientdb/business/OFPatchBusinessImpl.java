@@ -70,8 +70,8 @@ public class OFPatchBusinessImpl implements OFPatchBusiness {
 					dao.updateLinkWeight(Definition.DIJKSTRA_WEIGHT_NO_ROUTE, map.get(i-1).get("RID"), map.get(i).get("RID"));
 					dao.updateLinkWeight(Definition.DIJKSTRA_WEIGHT_NO_ROUTE, map.get(i+1).get("RID"), map.get(i).get("RID"));
 					
-					portNameList.add(map.get(i-1).get("name"));
-					portNameList.add(map.get(i+1).get("name"));
+					portNameList.add(map.get(i-1).get("number"));
+					portNameList.add(map.get(i+1).get("number"));
 					linkPatchPort.setDeviceName(map.get(i-1).get("deviceName"));
 					linkPatchPort.setPortName(portNameList);
 					linkPatchPortList.add(linkPatchPort);
@@ -136,14 +136,14 @@ public class OFPatchBusinessImpl implements OFPatchBusiness {
 				parentRid = portRidPair.get("parent");
 				rid = portRidPair.get("out");
 				document = dao.getPortInfo(rid);
-				portNameList.add(document.field("name").toString());
+				portNameList.add(document.field("number").toString());
 				deviceName = document.field("deviceName").toString();
 				
 				dao.updateLinkWeight(Definition.DIJKSTRA_WEIGHT_AVAILABLE_ROUTE, rid, parentRid);
 				
 				rid = portRidPair.get("in");
 				document = dao.getPortInfo(rid);
-				portNameList.add(document.field("name").toString());
+				portNameList.add(document.field("number").toString());
 				linkPatchPort.setDeviceName(deviceName);
 				linkPatchPort.setPortName(portNameList);
 				linkPatchPortList.add(linkPatchPort);

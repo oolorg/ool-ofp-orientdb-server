@@ -90,6 +90,21 @@ public interface Dao {
 	
 	/**
 	 * 
+	 * @param rid
+	 * @return portInfo
+	 */
+	ODocument getPortInfo(String name, String deviceName) throws SQLException;
+
+	/**
+	 * @param inRid
+	 * @param outRid
+	 * @return
+	 * @throws SQLException
+	 */
+	ODocument getLinkInfo(String outRid, String inRid) throws SQLException;
+	
+	/**
+	 * 
 	 * @param weight
 	 * @param portRid
 	 * @param patchRid
@@ -102,5 +117,41 @@ public interface Dao {
 	 * @return List<String>
 	 */
 	List<List<String>> getPatchConnectedDevice() throws SQLException;
+	
+	/**
+	 * 
+	 * @param name
+	 * @param type
+	 * @param ofpFlag
+	 * @return
+	 * @throws SQLException
+	 */
+	int createNodeInfo(String name, String type, boolean ofpFlag) throws SQLException;
+	
+	/**
+	 * @param portName
+	 * @param portNumber
+	 * @param deviceName
+	 * @param type
+	 * @return
+	 * @throws SQLException
+	 */
+	int createPortInfo(String portName, int portNumber, String deviceName, String type) throws SQLException;
+	
+	/**
+	 * @param inRid
+	 * @param outRid
+	 * @return
+	 * @throws SQLException
+	 */
+	int createLinkInfo(String outRid, String inRid) throws SQLException;
+	
+	/**
+	 * @param inRid
+	 * @param outRid
+	 * @return
+	 * @throws SQLException
+	 */
+	int deleteLinkInfo(String outRid, String inRid) throws SQLException;
 
 }
