@@ -94,6 +94,13 @@ public interface Dao {
 	 * @return portInfo
 	 */
 	ODocument getPortInfo(String name, String deviceName) throws SQLException;
+	
+	/**
+	 * 
+	 * @param rid
+	 * @return portInfo
+	 */
+	ODocument getPortInfo(int number, String deviceName) throws SQLException;
 
 	/**
 	 * @param inRid
@@ -127,6 +134,15 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	int createNodeInfo(String name, String type, boolean ofpFlag) throws SQLException;
+	
+	/**
+	 * @param key
+	 * @param name
+	 * @param ofpFlag
+	 * @return
+	 * @throws SQLException
+	 */
+	int updateNodeInfo(String key, String name, boolean ofpFlag) throws SQLException;
 	
 	/**
 	 * @param portName

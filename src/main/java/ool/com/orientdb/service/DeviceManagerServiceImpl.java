@@ -7,6 +7,7 @@ package ool.com.orientdb.service;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -81,6 +82,31 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
         
         if (logger.isDebugEnabled()) {
     		logger.debug(String.format("createPortInfo(ret=%s) - end ", ret));
+    	}
+		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.service.DeviceManagerService#updateDeviceInfo(java.lang.String)
+	 */
+	@Override
+	public Response updateDeviceInfo(@RequestBody String params) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("updateDeviceInfo(params=%s) - start ", params));
+    	}
+    	
+        this.injector = Guice.createInjector(new AbstractModule() {
+            @Override 
+            protected void configure() {
+            	bind(DeviceManagerBusiness.class).to(DeviceManagerBusinessImpl.class);
+            }
+        });
+
+        DeviceManagerServiceImpl main = injector.getInstance(DeviceManagerServiceImpl.class);
+        String ret = main.dmb.updateDeviceInfo(params);
+        
+        if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("updateDeviceInfo(ret=%s) - end ", ret));
     	}
 		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
 	}

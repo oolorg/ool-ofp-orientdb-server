@@ -14,4 +14,6 @@ public interface DeviceManagerBusiness {
 	String createDeviceInfo(String params);
 	
 	String createPortInfo(String params);
+	
+	String updateDeviceInfo(String params);
 }

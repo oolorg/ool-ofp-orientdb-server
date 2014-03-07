@@ -48,11 +48,16 @@ public class Definition {
 	public static final String SQL_DELETE_PATCH_WIRING = "delete from patchWiring where outDeviceName = '%s' and inDeviceName = '%s'";
 	public static final String SQL_GET_PORT = "select from port where @RID = %s";
 	public static final String SQL_GET_PORT_INFO = "select from port where name = '%s' and deviceName = '%s'";
+	public static final String SQL_GET_PORT_INFO2 = "select from port where number = %s and deviceName = '%s'";
 	public static final String SQL_GET_LINK = "select from link where out = %s and in = %s";
 	
-	public static final String SQL_INSERT_NODE = "insert into node (name, type, ofpFlag) values ('%s', '%s', %s)";
-	public static final String SQL_INSERT_PORT = "insert into port (name, number, type, deviceName) values ('%s', %s, '%s', '%s')";
-	public static final String SQL_INSERT_LINK = "insert into link (out, in ,weight) values (%s, %s, 1)";
+	//public static final String SQL_INSERT_NODE = "insert into node (name, type, ofpFlag) values ('%s', '%s', %s)";
+	public static final String SQL_INSERT_NODE = "create vertex node set name = '%s', type = '%s', ofpFlag = %s";
+	public static final String SQL_UPDATE_NODE = "update node set name = '%s', ofpFlag = %s where @RID = %s";
+	//public static final String SQL_INSERT_PORT = "insert into port (name, number, type, deviceName) values ('%s', %s, '%s', '%s')";
+	public static final String SQL_INSERT_PORT = "create vertex port set name = '%s', number = %s, type = '%s', deviceName = '%s'";
+	//public static final String SQL_INSERT_LINK = "insert into link (out, in ,weight) values (%s, %s, 1)";
+	public static final String SQL_INSERT_LINK = "create edge link from %s to %s set weight = 1";
 	
 	public static final String SQL_DELETE_LINK = "delete from link where out = %s and in = %s";
 

@@ -357,6 +357,29 @@ public class DaoImpl implements Dao {
 			throw new SQLException(e.getMessage());
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getPortInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public ODocument getPortInfo(int number, String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("getPortInfo(number=%s, deviceName=%s) - start", number, deviceName));
+		}
+		try {
+			String query = String.format(Definition.SQL_GET_PORT_INFO2, number, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
+			}
+			return documents.get(0);			
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.client.Dao#updateLinkWeight(int, java.lang.String, java.lang.String)
@@ -455,17 +478,34 @@ public class DaoImpl implements Dao {
 					portName, portNumber, deviceName, type));
 		}
 		try {
+			String nodeRid = "";
+			try {
+				ODocument document = getDeviceInfo(deviceName);
+				nodeRid = document.getIdentity().toString();
+			} catch(SQLException se) {
+				return Definition.DB_RESPONSE_STATUS_NOT_FOUND;
+			}
 			try {
 				ODocument document = getPortInfo(portName, deviceName);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
-			}
-			catch(SQLException se){
+			} catch(SQLException se){
+				try {
+					ODocument document = getPortInfo(portNumber, deviceName);
+					return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
+				} catch(SQLException se2){
+				}
 			}
 			String query = String.format(Definition.SQL_INSERT_PORT, portName, portNumber, type, deviceName);
 			if (logger.isInfoEnabled()){
 				logger.info(String.format("query=%s", query));
 			}
 			database.command(new OCommandSQL(query)).execute();
+			
+			// get rid
+			ODocument document = getPortInfo(portName, deviceName);
+			String portRid = document.getIdentity().toString();
+			createLinkInfo(nodeRid, portRid);
+			createLinkInfo(portRid, nodeRid);
 			if (logger.isDebugEnabled()){
 				logger.debug("createPortInfo() - end");
 			}
@@ -554,6 +594,16 @@ public class DaoImpl implements Dao {
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#updateNodeInfo(java.lang.String, java.lang.String, boolean)
+	 */
+	@Override
+	public int updateNodeInfo(String key, String name, boolean ofpFlag)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
