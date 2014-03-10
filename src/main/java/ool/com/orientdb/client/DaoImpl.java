@@ -599,8 +599,7 @@ public class DaoImpl implements Dao {
 	 * @see ool.com.orientdb.client.Dao#updateNodeInfo(java.lang.String, java.lang.String, boolean)
 	 */
 	@Override
-	public int updateNodeInfo(String key, String name, boolean ofpFlag)
-			throws SQLException {
+	public int updateNodeInfo(String key, String name, boolean ofpFlag) throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
 	}

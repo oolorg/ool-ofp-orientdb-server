@@ -44,7 +44,7 @@ public class ConnectionManager {
         		throw new RuntimeException(message);
         	}
         } catch (RuntimeException re) {
-        	throw new SQLException(re.getMessage());
+        	throw new SQLException(re.getMessage(), re);
         }
     	if (logger.isDebugEnabled()) {
     		logger.debug("initialize() - end");

@@ -185,10 +185,7 @@ public class OFPatchBusinessImpl implements OFPatchBusiness {
 		List<String> tmpList = Arrays.asList(shortestPath.split(", (port|node)"));
 		List<Map<String,String>> map = new ArrayList<Map<String,String>>();
 		
-		for (int i = 0; i < tmpList.size(); i++) {
-			if (i == 0) {
-				continue;
-			}
+		for (int i = 1; i < tmpList.size(); i++) {
 			List<String> tmp2List = Arrays.asList(tmpList.get(i).split(","));
 			Map<String,String> tmpMap = new HashMap<String,String>();
 			for (int j = 0; j < tmp2List.size(); j++) {
