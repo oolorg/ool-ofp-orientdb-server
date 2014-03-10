@@ -451,8 +451,7 @@ public class DaoImpl implements Dao {
 			try {
 				ODocument document = getDeviceInfo(name);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
-			}
-			catch(SQLException se){
+			} catch(SQLException se){
 			}
 			String query = String.format(Definition.SQL_INSERT_NODE, name, type, ofpFlag);
 			if (logger.isInfoEnabled()){
@@ -488,12 +487,12 @@ public class DaoImpl implements Dao {
 			try {
 				ODocument document = getPortInfo(portName, deviceName);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
-			} catch(SQLException se){
-				try {
-					ODocument document = getPortInfo(portNumber, deviceName);
-					return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
-				} catch(SQLException se2){
-				}
+			} catch(SQLException se) {
+			}
+			try {
+				ODocument document = getPortInfo(portNumber, deviceName);
+				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
+			} catch(SQLException se2) {
 			}
 			String query = String.format(Definition.SQL_INSERT_PORT, portName, portNumber, type, deviceName);
 			if (logger.isInfoEnabled()){
