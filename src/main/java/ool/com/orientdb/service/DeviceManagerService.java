@@ -12,22 +12,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Path("/deviceManager")
 public interface DeviceManagerService {
-	
+
     @POST
     @Path("/nodeCreate")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     Response createDeviceInfo(@RequestBody String params);
-    
+
     @PUT
-    @Path("/nodeCUpdate")
+    @Path("/nodeUpdate")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     Response updateDeviceInfo(@RequestBody String params);
-    
+
     @POST
     @Path("/portCreate")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     Response createPortInfo(@RequestBody String params);
+
+    @PUT
+    @Path("/portUpdate")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    Response updatePortInfo(@RequestBody String params);
 }

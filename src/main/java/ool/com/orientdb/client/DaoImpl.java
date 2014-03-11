@@ -1,7 +1,7 @@
 /**
  * @author OOL 1131080355959
  * @date 2014/02/17
- * @TODO 
+ * @TODO
  */
 package ool.com.orientdb.client;
 
@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import ool.com.orientdb.utils.Definition;
+
+import org.apache.log4j.Logger;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -24,9 +24,9 @@ import com.orientechnologies.orient.core.sql.OCommandSQL;
  *
  */
 public class DaoImpl implements Dao {
-	
+
 	private static final Logger logger = Logger.getLogger(DaoImpl.class);
-	
+
 	protected ConnectionUtils utils = null;
 	protected ODatabaseDocumentTx database = null;
 	protected List<ODocument> documents = null;
@@ -41,7 +41,7 @@ public class DaoImpl implements Dao {
 			logger.debug("DaoImpl() - end");
 		}
 	}
-	
+
 	synchronized private void init() throws SQLException {
 		if (logger.isDebugEnabled()){
 			logger.debug("init() - start");
@@ -51,7 +51,7 @@ public class DaoImpl implements Dao {
 			logger.debug("init() - end");
 		}
 	}
-	
+
 	synchronized public void close() throws SQLException {
 		if (logger.isDebugEnabled()){
 			logger.debug("close() - start");
@@ -63,7 +63,7 @@ public class DaoImpl implements Dao {
 			logger.debug("close() - end");
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.client.Dao#getDeviceRid(java.lang.String)
 	 */
@@ -108,7 +108,7 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getDeviceInfo(ret=%s) - end", documents.get(0)));
 			}
-			return documents.get(0);			
+			return documents.get(0);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -131,7 +131,7 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getConnectedDevice(ret=%s) - end", documents));
 			}
-			return documents;			
+			return documents;
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -182,7 +182,7 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("isContainsPatchWiring(ret=%s) - end", ret));
 			}
-			return ret;	
+			return ret;
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -215,7 +215,7 @@ public class DaoImpl implements Dao {
 	 * @see ool.com.orientdb.client.Dao#insertPatchWiring(java.util.List)
 	 */
 	@Override
-	synchronized public void insertPatchWiring(List<String> portRidList, 
+	synchronized public void insertPatchWiring(List<String> portRidList,
 			String parentRid, List<String> deviceNameList) throws SQLException {
 		if (logger.isDebugEnabled()){
 			logger.debug(String.format("insertPatchWiring(portRidList=%s, parentRid=%s, deviceNameList=%s) - start", portRidList, parentRid, deviceNameList));
@@ -329,12 +329,12 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
 			}
-			return documents.get(0);			
+			return documents.get(0);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.client.Dao#getPortInfo(java.lang.String, java.lang.String)
 	 */
@@ -352,12 +352,12 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
 			}
-			return documents.get(0);			
+			return documents.get(0);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.client.Dao#getPortInfo(java.lang.String, java.lang.String)
 	 */
@@ -375,7 +375,7 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
 			}
-			return documents.get(0);			
+			return documents.get(0);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -418,7 +418,7 @@ public class DaoImpl implements Dao {
 			logger.debug("getPatchConnectedDevice() - start");
 		}
 		try {
-			List<List<String>> deviceNameList = new ArrayList<List<String>>(); 
+			List<List<String>> deviceNameList = new ArrayList<List<String>>();
 			String query = Definition.SQL_GET_PATCH_CONNECTED_NODE;
 			if (logger.isInfoEnabled()){
 				logger.info(String.format("query=%s", query));
@@ -433,7 +433,7 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getPatchConnectedDevice(ret=%s) - end", deviceNameList));
 			}
-			return deviceNameList;			
+			return deviceNameList;
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -473,7 +473,7 @@ public class DaoImpl implements Dao {
 	@Override
 	public int createPortInfo(String portName, int portNumber, String type, String deviceName) throws SQLException {
 		if (logger.isDebugEnabled()){
-			logger.debug(String.format("createPortInfo(portName=%s, portNumber=%s, type=%s, deviceName=%s) - start", 
+			logger.debug(String.format("createPortInfo(portName=%s, portNumber=%s, type=%s, deviceName=%s) - start",
 					portName, portNumber, deviceName, type));
 		}
 		try {
@@ -499,7 +499,7 @@ public class DaoImpl implements Dao {
 				logger.info(String.format("query=%s", query));
 			}
 			database.command(new OCommandSQL(query)).execute();
-			
+
 			// get rid
 			ODocument document = getPortInfo(portName, deviceName);
 			String portRid = document.getIdentity().toString();
@@ -531,7 +531,7 @@ public class DaoImpl implements Dao {
 			if (logger.isDebugEnabled()){
 				logger.debug(String.format("getLinkInfo(ret=%s) - end", documents.get(0)));
 			}
-			return documents.get(0);			
+			return documents.get(0);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -600,8 +600,59 @@ public class DaoImpl implements Dao {
 	 */
 	@Override
 	public int updateNodeInfo(String key, String name, boolean ofpFlag) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("updateNodeInfo(key=%s, name=%s, ofpFlag=%s) - start", key, name, ofpFlag));
+		}
+		try {
+			String nodeRid = "";
+			try {
+				ODocument document = getDeviceInfo(key);
+				nodeRid = document.getIdentity().toString();
+			} catch(SQLException se){
+				return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //not found error
+			}
+			String query = String.format(Definition.SQL_UPDATE_NODE, name, ofpFlag, nodeRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+			if (logger.isDebugEnabled()){
+				logger.debug("updateNodeInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#updateNodeInfo(java.lang.String, java.lang.String, boolean)
+	 */
+	@Override
+	public int updatePortInfo(String keyPortName, String keyDeviceName, String portName, int portNumber, String type) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("updatePortInfo(keyPortName=%s, keyDeviceName=%s, portName=%s, portNumber=%s, type=%s) - start", keyPortName, keyDeviceName, portName, portNumber, type));
+		}
+		try {
+			String portRid = "";
+			try {
+				ODocument document = getPortInfo(keyPortName, keyDeviceName);
+				portRid = document.getIdentity().toString();
+			} catch(SQLException se){
+				return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //not found error
+			}
+			String query = String.format(Definition.SQL_UPDATE_PORT, portName, portNumber, type, portRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+			if (logger.isDebugEnabled()){
+				logger.debug("updatePortInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
 	}
 
 }

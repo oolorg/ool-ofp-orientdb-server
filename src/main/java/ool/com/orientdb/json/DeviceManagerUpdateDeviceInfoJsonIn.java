@@ -1,7 +1,7 @@
 /**
  * @author OOL 1131080355959
  * @date 2014/03/04
- * @TODO 
+ * @TODO
  */
 package ool.com.orientdb.json;
 
@@ -31,7 +31,7 @@ public class DeviceManagerUpdateDeviceInfoJsonIn {
 	public final Node getParams() {
 		return params;
 	}
-	/**S
+	/**
 	 * @param params the params to set
 	 */
 	public final void setParams(final Node params) {

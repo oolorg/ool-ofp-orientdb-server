@@ -1,7 +1,7 @@
 /**
  * @author OOL 1131080355959
  * @date 2014/02/17
- * @TODO 
+ * @TODO
  */
 package ool.com.orientdb.client;
 
@@ -16,30 +16,30 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  *
  */
 public interface Dao {
-	
+
 	void close() throws SQLException;
-	
+
 	/**
 	 * get rid of device from deviceName
 	 * @param deviceName
 	 * @return rid(device)
 	 */
 	String getDeviceRid(String deviceName) throws SQLException;
-	
+
 	/**
 	 * get device info from deviceName
 	 * @param deviceName
 	 * @return ODocument
 	 */
 	ODocument getDeviceInfo(String deviceName) throws SQLException;
-	
+
 	/**
 	 * get Connected device to device of rid
 	 * @param deviceRid
 	 * @return List<ODocument>
 	 */
 	List<ODocument> getConnectedDevice(String deviceRid) throws SQLException;
-	
+
 	/**
 	 * get rid of port list
 	 * @param deviceRid
@@ -47,56 +47,56 @@ public interface Dao {
 	 * @return rid of port list
 	 */
 	List<String> getPatchPortRidList(String deviceRid) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param patchPortPair
 	 * @return true:contain false:not contain
 	 */
 	boolean isContainsPatchWiring(List<String> patchPortPair) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param deviceRidList
 	 * @return
 	 */
 	ODocument getShortestPath(List<String> deviceRidList) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param portRidList
 	 */
 	void insertPatchWiring(List<String> portRidList, String parentRid, List<String> deviceNameList) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param deviceNameList two
 	 * @return portRidList two
 	 */
 	List<Map<String, String>> getPortRidPatchWiring(List<String> deviceNameList) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param deviceNameList
 	 */
 	void deleteRecordPatchWiring(List<String> deviceNameList) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param rid
 	 * @return portInfo
 	 */
 	ODocument getPortInfo(String rid) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param rid
 	 * @return portInfo
 	 */
 	ODocument getPortInfo(String name, String deviceName) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param rid
 	 * @return portInfo
 	 */
@@ -109,24 +109,24 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	ODocument getLinkInfo(String outRid, String inRid) throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param weight
 	 * @param portRid
 	 * @param patchRid
 	 */
 	void updateLinkWeight(int weight, String portRid, String patchRid) throws SQLException;
-	
+
 	/**
 	 * get patch Connected device to deviceName
 	 * @param deviceName
 	 * @return List<String>
 	 */
 	List<List<String>> getPatchConnectedDevice() throws SQLException;
-	
+
 	/**
-	 * 
+	 *
 	 * @param name
 	 * @param type
 	 * @param ofpFlag
@@ -134,7 +134,7 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	int createNodeInfo(String name, String type, boolean ofpFlag) throws SQLException;
-	
+
 	/**
 	 * @param key
 	 * @param name
@@ -143,7 +143,7 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	int updateNodeInfo(String key, String name, boolean ofpFlag) throws SQLException;
-	
+
 	/**
 	 * @param portName
 	 * @param portNumber
@@ -153,7 +153,18 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	int createPortInfo(String portName, int portNumber, String deviceName, String type) throws SQLException;
-	
+
+	/**
+	 * @param key
+	 * @param portName
+	 * @param portNumber
+	 * @param deviceName
+	 * @param type
+	 * @return
+	 * @throws SQLException
+	 */
+	int updatePortInfo(String keyPortName, String keyDeviceName, String portName, int portNumber, String type) throws SQLException;
+
 	/**
 	 * @param inRid
 	 * @param outRid
@@ -161,7 +172,7 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	int createLinkInfo(String outRid, String inRid) throws SQLException;
-	
+
 	/**
 	 * @param inRid
 	 * @param outRid

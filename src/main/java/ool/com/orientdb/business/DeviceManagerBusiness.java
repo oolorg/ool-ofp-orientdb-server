@@ -12,8 +12,10 @@ package ool.com.orientdb.business;
 public interface DeviceManagerBusiness {
 
 	String createDeviceInfo(String params);
-	
+
 	String createPortInfo(String params);
-	
+
 	String updateDeviceInfo(String params);
+
+	String updatePortInfo(String params);
 }
