@@ -85,5 +85,30 @@
   <build>
     <finalName>OrientDBService</finalName>
   </build>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/release/resources</directory>
+          </resource>
+          <resource>
+            <directory>src/main/resources</directory>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+    <profile>
+      <id>debug</id>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+  </profiles>
   <artifactId>OrientDBService</artifactId>
 </project>
