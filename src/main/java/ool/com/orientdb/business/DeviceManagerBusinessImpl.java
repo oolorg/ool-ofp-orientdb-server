@@ -16,6 +16,8 @@ import ool.com.orientdb.json.DeviceManagerCreateDeviceInfoJsonIn;
 import ool.com.orientdb.json.DeviceManagerCreateDeviceInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerCreatePortInfoJsonIn;
 import ool.com.orientdb.json.DeviceManagerCreatePortInfoJsonOut;
+import ool.com.orientdb.json.DeviceManagerDeleteDeviceInfoJsonOut;
+import ool.com.orientdb.json.DeviceManagerDeletePortInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerUpdateDeviceInfoJsonIn;
 import ool.com.orientdb.json.DeviceManagerUpdateDeviceInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerUpdatePortInfoJsonIn;
@@ -74,7 +76,9 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 			outPara.setMessage(re.getMessage());
 		} finally {
 			try {
-				dao.close();
+				if(dao != null) {
+					dao.close();
+				}
 			} catch (SQLException e) {
 				logger.error(e.getMessage());
 				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
@@ -130,7 +134,9 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 			outPara.setMessage(re.getMessage());
 		} finally {
 			try {
-				dao.close();
+				if(dao != null) {
+					dao.close();
+				}
 			} catch (SQLException e) {
 				logger.error(e.getMessage());
 				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
@@ -165,10 +171,16 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 			ConnectionUtils utils = new ConnectionUtilsImpl();
 			dao = new DaoImpl(utils);
 
-			if (dao.updateNodeInfo(inPara.getDeviceName(), inPara.getParams().getDeviceName(),
-					inPara.getParams().getOfpFlag()) == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
-				outPara.setStatusCode(Definition.DB_RESPONSE_STATUS_NOT_FOUND);
+			int status = dao.updateNodeInfo(
+					inPara.getDeviceName(),
+					inPara.getParams().getDeviceName(),
+					inPara.getParams().getOfpFlag());
+			if (status == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
 				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, inPara.getDeviceName()));
+			} else if (status == Definition.DB_RESPONSE_STATUS_EXIST) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_CONFLICT);
+				outPara.setMessage(String.format(ErrorMessage.ALREADY_EXIST, inPara.getDeviceName()));
 			} else {
 				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_CREATED);
 			}
@@ -182,7 +194,9 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 			outPara.setMessage(re.getMessage());
 		} finally {
 			try {
-				dao.close();
+				if(dao != null) {
+					dao.close();
+				}
 			} catch (SQLException e) {
 				logger.error(e.getMessage());
 				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
@@ -217,10 +231,19 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 			ConnectionUtils utils = new ConnectionUtilsImpl();
 			dao = new DaoImpl(utils);
 
-			if (dao.updatePortInfo(inPara.getPortName(), inPara.getDeviceName(),inPara.getParams().getPortName(),
-					inPara.getParams().getPortNumber(),inPara.getParams().getType()) == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
-				outPara.setStatusCode(Definition.DB_RESPONSE_STATUS_NOT_FOUND);
+			int status = dao.updatePortInfo(
+					inPara.getPortName(),
+					inPara.getDeviceName(),
+					inPara.getParams().getPortName(),
+					inPara.getParams().getPortNumber(),
+					inPara.getParams().getType());
+
+			if (status == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
 				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, inPara.getPortName()));
+			} else if (status == Definition.DB_RESPONSE_STATUS_EXIST) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_CONFLICT);
+				outPara.setMessage(String.format(ErrorMessage.ALREADY_EXIST, inPara.getPortName()));
 			} else {
 				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_CREATED);
 			}
@@ -234,7 +257,9 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 			outPara.setMessage(re.getMessage());
 		} finally {
 			try {
-				dao.close();
+				if(dao != null) {
+					dao.close();
+				}
 			} catch (SQLException e) {
 				logger.error(e.getMessage());
 				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
@@ -246,7 +271,115 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 		if (logger.isDebugEnabled()) {
     		logger.debug(String.format("updatePortInfo(ret=%s) - end ", ret));
     	}
-		return null;
+		return ret;
 	}
 
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.business.DeviceManagerBusiness#deleteDeviceInfo(java.lang.String)
+	 */
+	@Override
+	public String deleteDeviceInfo(String param) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deleteDeviceInfo(params=%s) - start ", param));
+    	}
+
+		String ret = "";
+		Dao dao = null;
+		DeviceManagerDeleteDeviceInfoJsonOut outPara = new DeviceManagerDeleteDeviceInfoJsonOut();
+
+		try {
+        	ConnectionUtils utils = new ConnectionUtilsImpl();
+        	dao = new DaoImpl(utils);
+
+        	int status = dao.deleteDeviceInfo(param);
+        	if (status == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
+        		outPara.setStatusCode(Definition.DB_RESPONSE_STATUS_NOT_FOUND);
+        		outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, param));
+        	} else if (status == Definition.HTTP_STATUS_CODE_FORBIDDEN) {
+        		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_FORBIDDEN);
+        		outPara.setMessage(String.format(ErrorMessage.IS_PATCHED, param));
+        	} else {
+        		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
+        	}
+    	} catch (SQLException e) {
+    		logger.error(e.getMessage());
+    		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+    		outPara.setMessage(e.getMessage());
+		}  catch (RuntimeException re) {
+			logger.error(re.getMessage());
+			outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			outPara.setMessage(re.getMessage());
+		} finally {
+			try {
+				if(dao != null) {
+					dao.close();
+				}
+			} catch (SQLException e) {
+				logger.error(e.getMessage());
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+				outPara.setMessage(e.getMessage());
+			}
+			Type type = new TypeToken<DeviceManagerDeleteDeviceInfoJsonOut>(){}.getType();
+	        ret = gson.toJson(outPara, type);
+		}
+		if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deleteDeviceInfo(ret=%s) - end ", ret));
+    	}
+		return ret;
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.business.DeviceManagerBusiness#deletePortInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String deletePortInfo(String portName, String deviceName) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deletePortInfo(portName=%s, deviceName=%s) - start ", portName, deviceName));
+    	}
+
+		String ret = "";
+		Dao dao = null;
+		DeviceManagerDeletePortInfoJsonOut outPara = new DeviceManagerDeletePortInfoJsonOut();
+
+		try {
+        	ConnectionUtils utils = new ConnectionUtilsImpl();
+        	dao = new DaoImpl(utils);
+
+        	int status = dao.deletePortInfo(portName, deviceName);
+        	if (status == Definition.DB_RESPONSE_STATUS_NOT_FOUND) {
+        		outPara.setStatusCode(Definition.DB_RESPONSE_STATUS_NOT_FOUND);
+        		outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, portName));
+        	} else if (status == Definition.DB_RESPONSE_STATUS_FORBIDDEN) {
+        		outPara.setStatusCode(Definition.DB_RESPONSE_STATUS_FORBIDDEN);
+        		outPara.setMessage(String.format(ErrorMessage.IS_PATCHED, portName));
+        	} else {
+        		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
+        	}
+    	} catch (SQLException e) {
+    		logger.error(e.getMessage());
+    		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+    		outPara.setMessage(e.getMessage());
+		}  catch (RuntimeException re) {
+			logger.error(re.getMessage());
+			outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			outPara.setMessage(re.getMessage());
+		} finally {
+			try {
+				if(dao != null) {
+					dao.close();
+				}
+			} catch (SQLException e) {
+				logger.error(e.getMessage());
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+				outPara.setMessage(e.getMessage());
+			}
+			Type type = new TypeToken<DeviceManagerDeletePortInfoJsonOut>(){}.getType();
+	        ret = gson.toJson(outPara, type);
+		}
+		if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deletePortInfo(ret=%s) - end ", ret));
+    	}
+		return ret;
+	}
 }

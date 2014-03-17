@@ -18,4 +18,8 @@ public interface DeviceManagerBusiness {
 	String updateDeviceInfo(String params);
 
 	String updatePortInfo(String params);
+
+	String deleteDeviceInfo(String params);
+
+	String deletePortInfo(String portName, String deviceName);
 }

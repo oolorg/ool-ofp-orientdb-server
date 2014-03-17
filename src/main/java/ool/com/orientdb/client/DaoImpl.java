@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import ool.com.orientdb.utils.Definition;
+import ool.com.orientdb.utils.ErrorMessage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
@@ -86,6 +88,8 @@ public class DaoImpl implements Dao {
 			} else {
 				return null;
 			}
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, deviceName));
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -109,6 +113,8 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getDeviceInfo(ret=%s) - end", documents.get(0)));
 			}
 			return documents.get(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, deviceName), e);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -183,6 +189,8 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("isContainsPatchWiring(ret=%s) - end", ret));
 			}
 			return ret;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -282,6 +290,8 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getPortRidPatchWiring(ret=%s) - end", portRidPairList));
 			}
 			return portRidPairList;
+		} catch (IndexOutOfBoundsException e) {
+			return new ArrayList<Map<String, String>>();
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -330,6 +340,8 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
 			}
 			return documents.get(0);
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, rid), ioobe);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -353,7 +365,9 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
 			}
 			return documents.get(0);
-		} catch (Exception e){
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, name + "," + deviceName), ioobe);
+		}  catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
 	}
@@ -376,7 +390,9 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getPortInfo(ret=%s) - end", documents.get(0)));
 			}
 			return documents.get(0);
-		} catch (Exception e){
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, deviceName + "[" + number + "]"), ioobe);
+		}  catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
 	}
@@ -434,6 +450,8 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getPatchConnectedDevice(ret=%s) - end", deviceNameList));
 			}
 			return deviceNameList;
+		} catch (IndexOutOfBoundsException e) {
+			return new ArrayList<List<String>>();
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -443,7 +461,7 @@ public class DaoImpl implements Dao {
 	 * @see ool.com.orientdb.client.Dao#createNodeInfo(java.lang.String, java.lang.String, boolean)
 	 */
 	@Override
-	public int createNodeInfo(String name, String type, boolean ofpFlag) throws SQLException {
+	public int createNodeInfo(String name, String type, String ofpFlag) throws SQLException {
 		if (logger.isDebugEnabled()){
 			logger.debug(String.format("createNodeInfo(name=%s, type=%s, ofpFlag=%s) - start", name, type, ofpFlag));
 		}
@@ -451,7 +469,13 @@ public class DaoImpl implements Dao {
 			try {
 				ODocument document = getDeviceInfo(name);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
-			} catch(SQLException se){
+			} catch (SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				}
+			}
+			if (StringUtils.isBlank(ofpFlag)) {
+				ofpFlag = "false";
 			}
 			String query = String.format(Definition.SQL_INSERT_NODE, name, type, ofpFlag);
 			if (logger.isInfoEnabled()){
@@ -482,17 +506,27 @@ public class DaoImpl implements Dao {
 				ODocument document = getDeviceInfo(deviceName);
 				nodeRid = document.getIdentity().toString();
 			} catch(SQLException se) {
-				return Definition.DB_RESPONSE_STATUS_NOT_FOUND;
+				if (se.getCause() == null) {
+					throw se;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND;
+				}
 			}
 			try {
-				ODocument document = getPortInfo(portName, deviceName);
+				getPortInfo(portName, deviceName);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
 			} catch(SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				}
 			}
 			try {
-				ODocument document = getPortInfo(portNumber, deviceName);
+				getPortInfo(portNumber, deviceName);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
 			} catch(SQLException se2) {
+				if (se2.getCause() == null) {
+					throw se2;
+				}
 			}
 			String query = String.format(Definition.SQL_INSERT_PORT, portName, portNumber, type, deviceName);
 			if (logger.isInfoEnabled()){
@@ -532,6 +566,8 @@ public class DaoImpl implements Dao {
 				logger.debug(String.format("getLinkInfo(ret=%s) - end", documents.get(0)));
 			}
 			return documents.get(0);
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, "Link"), ioobe);
 		} catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
@@ -547,10 +583,13 @@ public class DaoImpl implements Dao {
 		}
 		try {
 			try {
-				ODocument document = getLinkInfo(outRid, inRid);
+				getLinkInfo(outRid, inRid);
 				return Definition.DB_RESPONSE_STATUS_EXIST; //duplicate error
 			}
 			catch(SQLException se){
+				if (se.getCause() == null) {
+					throw se;
+				}
 			}
 			String query = String.format(Definition.SQL_INSERT_LINK, outRid, inRid);
 			if (logger.isInfoEnabled()){
@@ -579,7 +618,11 @@ public class DaoImpl implements Dao {
 				ODocument document = getLinkInfo(outRid, inRid);
 			}
 			catch(SQLException se){
-				return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //duplicate error
+				if (se.getCause() == null) {
+					throw se;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //duplicate error
+				}
 			}
 			String query = String.format(Definition.SQL_DELETE_LINK, outRid, inRid);
 			if (logger.isInfoEnabled()){
@@ -599,7 +642,7 @@ public class DaoImpl implements Dao {
 	 * @see ool.com.orientdb.client.Dao#updateNodeInfo(java.lang.String, java.lang.String, boolean)
 	 */
 	@Override
-	public int updateNodeInfo(String key, String name, boolean ofpFlag) throws SQLException {
+	public int updateNodeInfo(String key, String name, String ofpFlag) throws SQLException {
 		if (logger.isDebugEnabled()){
 			logger.debug(String.format("updateNodeInfo(key=%s, name=%s, ofpFlag=%s) - start", key, name, ofpFlag));
 		}
@@ -608,10 +651,46 @@ public class DaoImpl implements Dao {
 			try {
 				ODocument document = getDeviceInfo(key);
 				nodeRid = document.getIdentity().toString();
-			} catch(SQLException se){
-				return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //not found error
+				if(StringUtils.isBlank(name)) {
+					name = document.field("name").toString();
+				}
+				if(StringUtils.isBlank(ofpFlag)) {
+					ofpFlag = document.field("ofpFlag").toString();
+				}
+			} catch (SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //not found error
+				}
+			}
+			try  {
+				getDeviceInfo(name);
+				return Definition.DB_RESPONSE_STATUS_EXIST;
+			} catch (SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				}
 			}
 			String query = String.format(Definition.SQL_UPDATE_NODE, name, ofpFlag, nodeRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+
+			query = String.format(Definition.SQL_UPDATE_PORT_DEVICE_NAME, name, key);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+
+			query = String.format(Definition.SQL_UPDATE_PATCH_WIRING_IN_DEVICE, name, key);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+
+			query = String.format(Definition.SQL_UPDATE_PATCH_WIRING_OUT_DEVICE, name, key);
 			if (logger.isInfoEnabled()){
 				logger.info(String.format("query=%s", query));
 			}
@@ -638,8 +717,36 @@ public class DaoImpl implements Dao {
 			try {
 				ODocument document = getPortInfo(keyPortName, keyDeviceName);
 				portRid = document.getIdentity().toString();
-			} catch(SQLException se){
-				return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //not found error
+				if (StringUtils.isBlank(type)) {
+					type = document.field("type");
+				}
+			} catch (SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND; //not found error
+				}
+			}
+			try {
+				if (StringUtils.isBlank(portName)) {
+					ODocument document = getPortInfo(keyPortName, keyDeviceName);
+					portName = document.field("name");
+				} else {
+					getPortInfo(portName, keyDeviceName);
+					return Definition.DB_RESPONSE_STATUS_EXIST;
+				}
+			} catch (SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				}
+			}
+			try {
+				getPortInfo(portNumber, keyDeviceName);
+				return Definition.DB_RESPONSE_STATUS_EXIST;
+			} catch (SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				}
 			}
 			String query = String.format(Definition.SQL_UPDATE_PORT, portName, portNumber, type, portRid);
 			if (logger.isInfoEnabled()){
@@ -655,4 +762,284 @@ public class DaoImpl implements Dao {
 		}
 	}
 
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getConnectedDevice(java.lang.String)
+	 */
+	@Override
+	public List<ODocument> getConnectedLinks(String deviceRid) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("getNeighborPort(deviceRid=%s) - start", deviceRid));
+		}
+		try {
+			String query = String.format(Definition.SQL_GET_CONNECTED_LINK, deviceRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("getNeighborPort(ret=%s) - end", documents));
+			}
+			return documents;
+		} catch (IndexOutOfBoundsException ioobe) {
+			return new ArrayList<ODocument>();
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#deletePortInfo(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public int deletePortInfo(String portName, String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("deletePortInfo(portName=%s, deviceName=%s) - start", portName, deviceName));
+		}
+		try {
+			String portRid = "";
+			boolean ofpFlag = false;
+			try {
+				ODocument document = getDeviceInfo(deviceName);
+				ofpFlag = (document.field("ofpFlag").toString().equals(Definition.OFP_FLAG_TRUE))? true: false;
+			} catch(SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND;
+				}
+			}
+			try {
+				ODocument document = getPortInfo(portName, deviceName);
+				portRid = document.getIdentity().toString();
+			} catch(SQLException se) {
+				if (se.getCause() == null) {
+					throw se;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND;
+				}
+			}
+			if (ofpFlag) {
+				if (isConnectedPatchWiring(portRid)) {
+					return Definition.DB_RESPONSE_STATUS_FORBIDDEN;
+				}
+			} else {
+				List<ODocument> connectedLinks = getConnectedLinks(portRid);
+				for (ODocument connectedLink: connectedLinks) {
+					ODocument neighborPort = connectedLink.field("out");
+					String neighborPortRid = neighborPort.getIdentity().toString();
+					if (isConnectedPatchWiring(neighborPortRid)) {
+						return Definition.DB_RESPONSE_STATUS_FORBIDDEN;
+					}
+				}
+			}
+
+			String query = String.format(Definition.SQL_DELETE_LINK_CONNECTED_PORT, portRid, portRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+
+			query = String.format(Definition.SQL_DELETE_PORT, portName, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+
+			if (logger.isDebugEnabled()){
+				logger.debug("deletePortInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#isConnectedPatchWiring(java.lang.String)
+	 */
+	@Override
+	public boolean isConnectedPatchWiring(String portRid) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("isConnectedPatchWiring(portRid=%s) - start", portRid));
+		}
+		try {
+			String query = String.format(Definition.SQL_IS_CONNECTED_PATCH_WIRING, portRid, portRid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+
+			List<ODocument> documents = utils.query(database, query);
+			boolean ret = (documents.size() > 0) ? true : false;
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("isConnectedPatchWiring(ret=%s) - end", documents));
+			}
+			return ret;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#deleteDeviceInfo(java.lang.String)
+	 */
+	@Override
+	public int deleteDeviceInfo(String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("deleteDeviceInfo(deviceName=%s) - start", deviceName));
+		}
+		try {
+			String nodeRid = "";
+			boolean ofpFlag = false;
+			try {
+				ODocument document = getDeviceInfo(deviceName);
+				ofpFlag = (document.field("ofpFlag").toString().equals(Definition.OFP_FLAG_TRUE))? true: false;
+				nodeRid = document.getIdentity().toString();
+			} catch (SQLException sqle) {
+				if (sqle.getCause() == null) {
+					throw sqle;
+				} else {
+					return Definition.DB_RESPONSE_STATUS_NOT_FOUND;
+				}
+			}
+			if (ofpFlag) {
+				if (isPatched(nodeRid)) {
+					return Definition.DB_RESPONSE_STATUS_FORBIDDEN;
+				}
+			} else {
+				if (isContainsPatchWiring(deviceName)) {
+					return Definition.DB_RESPONSE_STATUS_FORBIDDEN;
+				}
+			}
+			List<ODocument> connectedLinks;
+			connectedLinks = getConnectedLinks(nodeRid);
+
+			String query = "";
+			for (ODocument connectedLink : connectedLinks) {
+				ODocument neighborPort = connectedLink.field("out");
+				String neighborPortRid = neighborPort.getIdentity().toString();
+				query = String.format(Definition.SQL_DELETE_LINK_CONNECTED_PORT, neighborPortRid, neighborPortRid);
+				if (logger.isInfoEnabled()){
+					logger.info(String.format("query=%s", query));
+				}
+				try {
+					database.command(new OCommandSQL(query)).execute();
+				} catch (Exception sqlException) {
+					throw new SQLException(sqlException.getMessage());
+				}
+			}
+
+			query = String.format(Definition.SQL_DELETE_PORT_DEViCE_NAME, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			try {
+				database.command(new OCommandSQL(query)).execute();
+			} catch (Exception sqlException) {
+				throw new SQLException(sqlException.getMessage());
+			}
+
+			query = String.format(Definition.SQL_DELETE_NODE, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			database.command(new OCommandSQL(query)).execute();
+
+			if (logger.isDebugEnabled()){
+				logger.debug("deleteDeviceInfo() - end");
+			}
+			return Definition.DB_RESPONSE_STATUS_OK;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#isHadPatchWiring(java.lang.String)
+	 */
+	@Override
+	public boolean isPatched(String rid) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("isHadPatchWiring(rid=%s) - start", rid));
+		}
+		try {
+			String query = String.format(Definition.SQL_IS_HAD_PATCH_WIRING, rid);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+
+			List<ODocument> documents = utils.query(database, query);
+			boolean ret = (documents.size() > 0) ? true : false;
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("isHadPatchWiring(ret=%s) - end", documents));
+			}
+			return ret;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#isContaintsPatchWiring(java.lang.String)
+	 */
+	@Override
+	public boolean isContainsPatchWiring(String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("isContaintsPatchWiring(rid=%s) - start", deviceName));
+		}
+		try {
+			String query = String.format(Definition.SQL_IS_CONTAINS_PATCH_WIRING, deviceName, deviceName
+					);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+
+			List<ODocument> documents = utils.query(database, query);
+			boolean ret = (documents.size() > 0) ? true : false;
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("isContaintsPatchWiring(ret=%s) - end", documents));
+			}
+			return ret;
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getPatchConnectedDevice(java.lang.String)
+	 */
+	@Override
+	public List<List<String>> getPatchConnectedDevice(String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug("getPatchConnectedDevice() - start");
+		}
+		try {
+			List<List<String>> deviceNameList = new ArrayList<List<String>>();
+			String query = String.format(Definition.SQL_GET_PATCH_CONNECTED_DEVICE_NAME, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			for (ODocument document: documents) {
+				List<String> connectNode = new ArrayList<String>();
+				connectNode.add(document.field("outDeviceName").toString());
+				connectNode.add(document.field("inDeviceName").toString());
+				deviceNameList.add(connectNode);
+			}
+			if (logger.isDebugEnabled()){
+				logger.debug(String.format("getPatchConnectedDevice(ret=%s) - end", deviceNameList));
+			}
+			return deviceNameList;
+		} catch (IndexOutOfBoundsException e) {
+			return new ArrayList<List<String>>();
+		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
 }

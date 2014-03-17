@@ -132,4 +132,55 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
 	}
 
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.service.DeviceManagerService#deleteDeviceInfo(java.lang.String)
+	 */
+	@Override
+	public Response deleteDeviceInfo(String params) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deleteDeviceInfo(params=%s) - start ", params));
+    	}
+
+        this.injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+            	bind(DeviceManagerBusiness.class).to(DeviceManagerBusinessImpl.class);
+            }
+        });
+
+        DeviceManagerServiceImpl main = injector.getInstance(DeviceManagerServiceImpl.class);
+        String ret = main.dmb.deleteDeviceInfo(params);
+
+        if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deleteDeviceInfo(ret=%s) - end ", ret));
+    	}
+		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.service.DeviceManagerService#deletePortInfo(java.lang.String)
+	 */
+	@Override
+	public Response deletePortInfo(String portName, String deviceName) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deletePortInfo(portName=%s, deviceName=%s) - start ", portName, deviceName));
+    	}
+
+        this.injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+            	bind(DeviceManagerBusiness.class).to(DeviceManagerBusinessImpl.class);
+            }
+        });
+
+        DeviceManagerServiceImpl main = injector.getInstance(DeviceManagerServiceImpl.class);
+        String ret = main.dmb.deletePortInfo(portName, deviceName);
+
+        if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("deletePortInfo(ret=%s) - end ", ret));
+    	}
+		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
+	}
+
 }

@@ -1,7 +1,7 @@
 /**
  * @author OOL 1131080355959
  * @date 2014/02/13
- * @TODO 
+ * @TODO
  */
 package ool.com.orientdb.json;
 
@@ -10,10 +10,10 @@ package ool.com.orientdb.json;
  *
  */
 public class Node {
-	
+
 	private String deviceName;
 	private String deviceType;
-	private boolean ofpFlag;
+	private String ofpFlag;
 	/**
 	 * @return the deviceName
 	 */
@@ -41,17 +41,17 @@ public class Node {
 	/**
 	 * @return the ofpFlag
 	 */
-	public boolean getOfpFlag() {
+	public String getOfpFlag() {
 		return ofpFlag;
 	}
 	/**
 	 * @param ofpFlag the ofpFlag to set
 	 */
-	public void setOfpFlag(final boolean ofpFlag) {
+	public void setOfpFlag(final String ofpFlag) {
 		this.ofpFlag = ofpFlag;
 	}
 
-	
-	
+
+
 
 }

@@ -133,7 +133,7 @@ public interface Dao {
 	 * @return
 	 * @throws SQLException
 	 */
-	int createNodeInfo(String name, String type, boolean ofpFlag) throws SQLException;
+	int createNodeInfo(String name, String type, String ofpFlag) throws SQLException;
 
 	/**
 	 * @param key
@@ -142,7 +142,7 @@ public interface Dao {
 	 * @return
 	 * @throws SQLException
 	 */
-	int updateNodeInfo(String key, String name, boolean ofpFlag) throws SQLException;
+	int updateNodeInfo(String key, String name, String ofpFlag) throws SQLException;
 
 	/**
 	 * @param portName
@@ -180,5 +180,50 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	int deleteLinkInfo(String outRid, String inRid) throws SQLException;
+
+	/**
+	 * @param deviceRid
+	 * @return
+	 * @throws SQLException
+	 */
+	List<ODocument> getConnectedLinks(String deviceRid) throws SQLException;
+
+	/**
+	 * @param portName
+	 * @param deviceName
+	 * @return
+	 * @throws SQLException
+	 */
+	int deletePortInfo(String portName, String deviceName) throws SQLException;
+
+	/**
+	 * @param portRid
+	 * @return
+	 * @throws SQLException
+	 */
+	boolean isConnectedPatchWiring(String portRid) throws SQLException;
+
+	/**
+	 * @param deviceName
+	 * @return
+	 * @throws SQLException
+	 */
+	int deleteDeviceInfo(String deviceName) throws SQLException;
+
+	/**
+	 * @param deviceName
+	 * @return
+	 * @throws SQLException
+	 */
+	boolean isContainsPatchWiring(String deviceName) throws SQLException;
+
+	/**
+	 * @param rid
+	 * @return
+	 * @throws SQLException
+	 */
+	boolean isPatched(String rid) throws SQLException;
+
+	List<List<String>> getPatchConnectedDevice(String deviceName) throws SQLException;
 
 }
