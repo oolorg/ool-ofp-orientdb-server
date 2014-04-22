@@ -50,8 +50,4 @@ public class Node {
 	public void setOfpFlag(final String ofpFlag) {
 		this.ofpFlag = ofpFlag;
 	}
-
-
-
-
 }

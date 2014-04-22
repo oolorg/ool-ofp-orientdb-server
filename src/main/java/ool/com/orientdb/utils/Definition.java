@@ -57,6 +57,8 @@ public class Definition {
 	public static final String SQL_IS_CONNECTED_PATCH_WIRING = "select from patchWiring where out = %s or in = %s";
 	public static final String SQL_IS_CONTAINS_PATCH_WIRING = "select from patchWiring where outDeviceName = '%s' or inDeviceName = '%s'";
 	public static final String SQL_GET_PATCH_CONNECTED_DEVICE_NAME = "select from patchWiring where inDeviceName = '%s'";
+	
+	public static final String SQL_GET_PORT_LIST = "select from port where deviceName = '%s'";
 
 	// insert
 	public static final String SQL_INSERT_PATCH_WIRING = "insert into patchWiring(out, in, parent, outDeviceName, inDeviceName) values (%s, %s, %s, '%s', '%s')";

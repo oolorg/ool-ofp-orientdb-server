@@ -5,6 +5,11 @@
  */
 package ool.com.orientdb.service;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -179,6 +184,31 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 
         if (logger.isDebugEnabled()) {
     		logger.debug(String.format("deletePortInfo(ret=%s) - end ", ret));
+    	}
+		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.service.DeviceManagerService#getConnectedPort(java.lang.String)
+	 */
+	@Override
+	public Response getConnectedPortInfo(@QueryParam("deviceName") String deviceName) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("getConnectedPortInfo(deviceName=%s) - start ", deviceName));
+    	}
+
+        this.injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+            	bind(DeviceManagerBusiness.class).to(DeviceManagerBusinessImpl.class);
+            }
+        });
+
+        DeviceManagerServiceImpl main = injector.getInstance(DeviceManagerServiceImpl.class);
+        String ret = main.dmb.getConnectedPortInfo(deviceName);
+
+        if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("getConnectedPortInfo(ret=%s) - end ", ret));
     	}
 		return Response.ok(ret).type(MediaType.APPLICATION_JSON_TYPE).build();
 	}

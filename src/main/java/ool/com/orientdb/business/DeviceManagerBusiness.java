@@ -22,4 +22,6 @@ public interface DeviceManagerBusiness {
 	String deleteDeviceInfo(String params);
 
 	String deletePortInfo(String portName, String deviceName);
+	
+	String getConnectedPortInfo(String deviceName);
 }

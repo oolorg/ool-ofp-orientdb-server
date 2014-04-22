@@ -224,6 +224,18 @@ public interface Dao {
 	 */
 	boolean isPatched(String rid) throws SQLException;
 
+	/**
+	 * @param deviceName
+	 * @return
+	 * @throws SQLException
+	 */
 	List<List<String>> getPatchConnectedDevice(String deviceName) throws SQLException;
+	
+	/**
+	 * @param deviceName
+	 * @return portRID List
+	 * @throws SQLException
+	 */
+	List<ODocument> getPortList(String deviceName) throws SQLException;
 
 }

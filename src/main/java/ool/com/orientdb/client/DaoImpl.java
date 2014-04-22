@@ -762,7 +762,6 @@ public class DaoImpl implements Dao {
 		}
 	}
 
-
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.client.Dao#getConnectedDevice(java.lang.String)
 	 */
@@ -1039,6 +1038,31 @@ public class DaoImpl implements Dao {
 		} catch (IndexOutOfBoundsException e) {
 			return new ArrayList<List<String>>();
 		} catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getPortList(java.lang.String)
+	 */
+	@Override
+	public List<ODocument> getPortList(String deviceName) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("getPortList(deviceName=%s) - start", deviceName));
+		}
+		try {
+			String query = String.format(Definition.SQL_GET_PORT_LIST, deviceName);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("getPortList(ret=%s) - end", documents));
+			}
+			return documents;
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, deviceName), ioobe);
+		}  catch (Exception e){
 			throw new SQLException(e.getMessage());
 		}
 	}
