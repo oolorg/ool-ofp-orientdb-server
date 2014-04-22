@@ -431,7 +431,8 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
     			
         		for (ODocument connectedPort : connectedPorts) {
         			try {
-        				ODocument portInfo = dao.getPortInfo(connectedPort.field("out").toString());
+        				ODocument port = connectedPort.field("out");
+        				ODocument portInfo = dao.getPortInfo(port.getIdentity().toString());
         				
         				linkData = resultData.new LinkData();
         				linkData.setPortName(portInfo.field("name").toString());
@@ -449,9 +450,14 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
         		}
         		outPara.addResultData(resultData);
         	}
+        	outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
     	} catch (SQLException e) {
     		logger.error(e.getMessage());
-    		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			if (e.getCause() == null) {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			} else {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+			}
     		outPara.setMessage(e.getMessage());
 		}  catch (RuntimeException re) {
 			logger.error(re.getMessage());

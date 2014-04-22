@@ -5,6 +5,7 @@
  */
 package ool.com.orientdb.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ool.com.orientdb.json.LogicalTopologyJsonGetOut.ResultData;
@@ -18,7 +19,7 @@ import com.google.gson.annotations.SerializedName;
 public class DeviceManagerGetConnectedPortInfoJsonOut extends BaseJsonOut {
 	
 	@SerializedName("result")
-	private List<ResultData> resultData;
+	private List<ResultData> resultData = new ArrayList<ResultData>();
 	
 	public List<ResultData> getResultData() {
 		return resultData;
@@ -34,7 +35,7 @@ public class DeviceManagerGetConnectedPortInfoJsonOut extends BaseJsonOut {
 	
 	public class ResultData {
 		@SerializedName("link")
-		private List<LinkData> linkData;
+		private List<LinkData> linkData = new ArrayList<LinkData>();
 		
 		public List<LinkData> getLinkData() {
 			return linkData;
