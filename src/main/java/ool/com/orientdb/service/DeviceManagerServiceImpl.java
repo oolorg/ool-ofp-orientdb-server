@@ -5,11 +5,6 @@
  */
 package ool.com.orientdb.service;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -189,10 +184,10 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 	}
 
 	/* (non-Javadoc)
-	 * @see ool.com.orientdb.service.DeviceManagerService#getConnectedPort(java.lang.String)
+	 * @see ool.com.orientdb.service.DeviceManagerService#getConnectedPortInfo(java.lang.String)
 	 */
 	@Override
-	public Response getConnectedPortInfo(@QueryParam("deviceName") String deviceName) {
+	public Response getConnectedPortInfo(String deviceName) {
     	if (logger.isDebugEnabled()) {
     		logger.debug(String.format("getConnectedPortInfo(deviceName=%s) - start ", deviceName));
     	}

@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
+
 @Path("/deviceManager")
 public interface DeviceManagerService {
 
@@ -51,7 +52,7 @@ public interface DeviceManagerService {
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
     Response deletePortInfo(@QueryParam("portName") String portName, @QueryParam("deviceName") String deviceName);
-    
+
     @GET
     @Path("/connectedPort")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
