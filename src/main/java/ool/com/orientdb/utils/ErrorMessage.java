@@ -14,5 +14,6 @@ public class ErrorMessage {
 	public static final String ALREADY_EXIST = "%s is already exists";
 	public static final String NOT_FOUND = "%s is not found";
 	public static final String IS_PATCHED = "%s is patched";
+	public static final String IS_NO_ROUTE = "%s and %s are no route";
 
 }

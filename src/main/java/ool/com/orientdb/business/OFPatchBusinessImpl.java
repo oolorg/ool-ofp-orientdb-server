@@ -20,6 +20,7 @@ import ool.com.orientdb.json.ConnectPatchJsonIn;
 import ool.com.orientdb.json.ConnectPatchJsonOut;
 import ool.com.orientdb.json.LinkPatchPort;
 import ool.com.orientdb.utils.Definition;
+import ool.com.orientdb.utils.ErrorMessage;
 
 import org.apache.log4j.Logger;
 
@@ -59,6 +60,14 @@ public class OFPatchBusinessImpl implements OFPatchBusiness {
 			for (int i = 0; i < map.size(); i++) {
 				if(map.get(i).containsKey("ofpFlag")) {
 					if (i == 0 || i == map.size() - 1) continue;
+					
+					int weight1 = dao.getLinkInfo(map.get(i-1).get("RID"), map.get(i).get("RID")).field("weight");
+					int weight2 = dao.getLinkInfo(map.get(i+1).get("RID"), map.get(i).get("RID")).field("weight");
+					if (weight1 == Definition.DIJKSTRA_WEIGHT_NO_ROUTE || weight2 == Definition.DIJKSTRA_WEIGHT_NO_ROUTE) {
+						linkPatchPortList.clear();
+						break;
+					}
+					
 					List<String> portNameList = new ArrayList<String>();
 					LinkPatchPort linkPatchPort = new LinkPatchPort();
 					List<String> portRidList = new ArrayList<String>();
@@ -77,9 +86,14 @@ public class OFPatchBusinessImpl implements OFPatchBusiness {
 					linkPatchPortList.add(linkPatchPort);
 				}
 			}
-
-			ret.setLinks(linkPatchPortList);
-			ret.setStatusCode(Definition.HTTP_STATUS_CODE_CREATED);
+			
+			if (linkPatchPortList.isEmpty()) {
+				ret.setMessage(String.format(ErrorMessage.IS_NO_ROUTE, deviceNameList.get(0), deviceNameList.get(1)));
+				ret.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+			} else {
+				ret.setLinks(linkPatchPortList);
+				ret.setStatusCode(Definition.HTTP_STATUS_CODE_CREATED);
+			}
     	} catch (SQLException e) {
     		logger.error(e.getMessage());
     		ret.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
