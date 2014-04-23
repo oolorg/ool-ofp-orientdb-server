@@ -237,5 +237,14 @@ public interface Dao {
 	 * @throws SQLException
 	 */
 	List<ODocument> getPortList(String deviceName) throws SQLException;
+	
+	/**
+	 * @param deviceName
+	 * @param deviceType
+	 * @param ofpFlag
+	 * @return
+	 * @throws SQLException
+	 */
+	List<ODocument> getDeviceList(String deviceName, String deviceType, String ofpFlag) throws SQLException;
 
 }

@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Path("/deviceManager")
 public interface DeviceManagerService {
+	
+    @GET
+    @Path("/nodeGet")
+    @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
+    @Produces({ MediaType.APPLICATION_JSON })
+    Response getDeviceInfo(@QueryParam("deviceName") String deviceName, @QueryParam("deviceType") String deviceType, @QueryParam("ofpFlag") String ofpFlag);
 
     @POST
     @Path("/nodeCreate")

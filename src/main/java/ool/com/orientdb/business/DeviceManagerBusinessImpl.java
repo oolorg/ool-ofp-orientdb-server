@@ -21,10 +21,12 @@ import ool.com.orientdb.json.DeviceManagerCreatePortInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerDeleteDeviceInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerDeletePortInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerGetConnectedPortInfoJsonOut;
+import ool.com.orientdb.json.DeviceManagerGetDeviceInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerUpdateDeviceInfoJsonIn;
 import ool.com.orientdb.json.DeviceManagerUpdateDeviceInfoJsonOut;
 import ool.com.orientdb.json.DeviceManagerUpdatePortInfoJsonIn;
 import ool.com.orientdb.json.DeviceManagerUpdatePortInfoJsonOut;
+import ool.com.orientdb.json.Node;
 import ool.com.orientdb.utils.Definition;
 import ool.com.orientdb.utils.ErrorMessage;
 
@@ -43,6 +45,67 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 	private static final Logger logger = Logger.getLogger(DeviceManagerBusinessImpl.class);
 
 	Gson gson = new Gson();
+	
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.business.DeviceManagerBusiness#getDeviceInfo(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String getDeviceInfo(String deviceName, String deviceType, String ofpFlag) {
+    	if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("getDeviceInfo(deviceName=%s, deviceType=%s, ofpFlag=%s) - start ", deviceName, deviceType, ofpFlag));
+    	}
+
+		String ret = "";
+		Dao dao = null;
+		DeviceManagerGetDeviceInfoJsonOut outPara = new DeviceManagerGetDeviceInfoJsonOut();
+
+		try {
+        	ConnectionUtils utils = new ConnectionUtilsImpl();
+        	dao = new DaoImpl(utils);
+
+        	List<ODocument> documents = dao.getDeviceList(deviceName, deviceType, ofpFlag);
+        	List<Node> nodeList = new ArrayList<Node>();
+        	
+        	for (ODocument document : documents) {
+        		Node node = new Node();
+        		node.setDeviceName(document.field(Definition.SQL_NODE_KEY_NAME).toString());
+        		node.setDeviceType(document.field(Definition.SQL_NODE_KEY_TYPE).toString());
+        		node.setOfpFlag(document.field(Definition.SQL_NODE_KEY_FLAG).toString());
+        		nodeList.add(node);
+        	}
+        	outPara.setResultData(nodeList);
+       		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
+    	} catch (SQLException e) {
+    		logger.error(e.getMessage());
+    		if (e.getCause() == null) {
+    			outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+        		outPara.setMessage(e.getMessage());
+			} else {
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, "device"));
+			}
+		}  catch (RuntimeException re) {
+			logger.error(re.getMessage());
+			outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+			outPara.setMessage(re.getMessage());
+		} finally {
+			try {
+				if(dao != null) {
+					dao.close();
+				}
+			} catch (SQLException e) {
+				logger.error(e.getMessage());
+				outPara.setStatusCode(Definition.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+				outPara.setMessage(e.getMessage());
+			}
+			Type type = new TypeToken<DeviceManagerGetDeviceInfoJsonOut>(){}.getType();
+	        ret = gson.toJson(outPara, type);
+		}
+		if (logger.isDebugEnabled()) {
+    		logger.debug(String.format("getDeviceInfo(ret=%s) - end ", ret));
+    	}
+		return ret;
+	}
 
 	/* (non-Javadoc)
 	 * @see ool.com.orientdb.business.DeviceManagerBusiness#createDeviceInfo(java.lang.String)
@@ -92,7 +155,7 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
 	        ret = gson.toJson(outPara, type);
 		}
 		if (logger.isDebugEnabled()) {
-    		logger.debug(String.format("createDeviceInfo(ret=%s) - end ", ret));
+    		logger.debug(String.format("getDeviceInfo(ret=%s) - end ", ret));
     	}
 		return ret;
 	}

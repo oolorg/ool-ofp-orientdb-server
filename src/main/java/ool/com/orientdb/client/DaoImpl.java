@@ -1066,4 +1066,57 @@ public class DaoImpl implements Dao {
 			throw new SQLException(e.getMessage());
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see ool.com.orientdb.client.Dao#getDeviceList(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public List<ODocument> getDeviceList(String deviceName, String deviceType, String ofpFlag) throws SQLException {
+		if (logger.isDebugEnabled()){
+			logger.debug(String.format("getDeviceList(deviceName=%s, deviceType=%s, ofpFlag=%s) - start", deviceName, deviceType, ofpFlag));
+		}
+		try {
+			StringBuilder condition = new StringBuilder();
+			condition.append("");
+			boolean conditionFlag = false;
+			if (!StringUtils.isBlank(deviceName)) {
+				condition.append(Definition.SQL_NODE_KEY_NAME + "=" + "'" + deviceName + "'");
+				conditionFlag = true;
+			}
+			if (!StringUtils.isBlank(deviceType)) {
+				if (conditionFlag) {
+					condition.append(" and ");
+				} else {
+					condition.append(" ");
+				}
+				condition.append(Definition.SQL_NODE_KEY_TYPE + "=" + "'" + deviceType + "'");
+				conditionFlag = true;
+			}
+			if (!StringUtils.isBlank(ofpFlag)) {
+				if (conditionFlag) {
+					condition.append(" and ");
+				} else {
+					condition.append(" ");
+				}
+				condition.append(Definition.SQL_NODE_KEY_FLAG + "=" + ofpFlag);
+				conditionFlag = true;
+			}
+			if (conditionFlag) {
+				condition.insert(0, "where ");
+			}
+			String query = String.format(Definition.SQL_GET_DEVICE_LIST, condition);
+			if (logger.isInfoEnabled()){
+				logger.info(String.format("query=%s", query));
+			}
+			documents = utils.query(database, query);
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("getDeviceList(ret=%s) - end", documents));
+			}
+			return documents;
+		} catch (IndexOutOfBoundsException ioobe) {
+			throw new SQLException(String.format(ErrorMessage.NOT_FOUND, deviceName), ioobe);
+		}  catch (Exception e){
+			throw new SQLException(e.getMessage());
+		}
+	}
 }

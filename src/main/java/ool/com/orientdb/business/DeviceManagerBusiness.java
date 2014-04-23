@@ -10,6 +10,8 @@ package ool.com.orientdb.business;
  *
  */
 public interface DeviceManagerBusiness {
+	
+	String getDeviceInfo(String deviceName, String deviceType, String ofpFlag);
 
 	String createDeviceInfo(String params);
 

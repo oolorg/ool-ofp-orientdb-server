@@ -38,9 +38,14 @@ public class Definition {
 	public static final int DB_RESPONSE_STATUS_NOT_FOUND = 404;
 	public static final int DB_RESPONSE_STATUS_USED = 220;
 	public static final int DB_RESPONSE_STATUS_FORBIDDEN = 403;
+	
+	public static final String SQL_NODE_KEY_NAME = "name";
+	public static final String SQL_NODE_KEY_TYPE = "type";
+	public static final String SQL_NODE_KEY_FLAG = "ofpFlag";
 
 	// select
 	public static final String SQL_GET_DEVICE = "select from node where name='%s'";
+	public static final String SQL_GET_DEVICE_LIST = "select from node %s";
 	public static final String SQL_GET_CONNECTED_NODE = "select from (traverse * from %s) where @class='node' and $depth=6";
 	public static final String SQL_GET_PATCHPORT_RID = "select from (traverse * from %s) where @class='port' and $depth=4";
 	public static final String SQL_GET_PATCH_WIRING = "select from patchWiring where out = %s and in = %s";
