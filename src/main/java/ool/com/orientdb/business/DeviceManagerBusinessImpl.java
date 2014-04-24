@@ -66,15 +66,20 @@ public class DeviceManagerBusinessImpl implements DeviceManagerBusiness {
         	List<ODocument> documents = dao.getDeviceList(deviceName, deviceType, ofpFlag);
         	List<Node> nodeList = new ArrayList<Node>();
         	
-        	for (ODocument document : documents) {
-        		Node node = new Node();
-        		node.setDeviceName(document.field(Definition.SQL_NODE_KEY_NAME).toString());
-        		node.setDeviceType(document.field(Definition.SQL_NODE_KEY_TYPE).toString());
-        		node.setOfpFlag(document.field(Definition.SQL_NODE_KEY_FLAG).toString());
-        		nodeList.add(node);
+        	if (documents.isEmpty()) {
+        		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_NOT_FOUND);
+				outPara.setMessage(String.format(ErrorMessage.NOT_FOUND, "device"));
+        	} else {
+        		for (ODocument document : documents) {
+        			Node node = new Node();
+        			node.setDeviceName(document.field(Definition.SQL_NODE_KEY_NAME).toString());
+        			node.setDeviceType(document.field(Definition.SQL_NODE_KEY_TYPE).toString());
+        			node.setOfpFlag(document.field(Definition.SQL_NODE_KEY_FLAG).toString());
+        			nodeList.add(node);
+        		}
+        		outPara.setResultData(nodeList);
+        		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
         	}
-        	outPara.setResultData(nodeList);
-       		outPara.setStatusCode(Definition.HTTP_STATUS_CODE_OK);
     	} catch (SQLException e) {
     		logger.error(e.getMessage());
     		if (e.getCause() == null) {
